@@ -63,7 +63,7 @@ export async function rejectStaff(userId: string) {
         });
         revalidatePath('/admin');
         return { success: true };
-    } catch (error) {
+    } catch (_error) {
         return { error: 'Failed to reject staff' };
     }
 }
@@ -74,9 +74,8 @@ export async function getAllStaff() {
         throw new Error('Unauthorized');
     }
 
-    const where: any = {
+    const where: { status: UserStatus; section?: Section } = {
         status: 'APPROVED',
-        // Filter by section if Head/Principal
     };
 
     if (session?.user.position === 'HEADMASTER') {

@@ -1,5 +1,5 @@
 import { UserPosition, Section, UserStatus } from '@prisma/client';
-import NextAuth, { DefaultSession } from 'next-auth';
+import { DefaultSession } from 'next-auth';
 
 declare module 'next-auth' {
     interface Session {
@@ -12,6 +12,7 @@ declare module 'next-auth' {
             managedSection?: Section | null;
             isClassTeacher: boolean;
             isSubjectTeacher: boolean;
+            assignedClassId?: string | null;
         } & DefaultSession['user'];
     }
 

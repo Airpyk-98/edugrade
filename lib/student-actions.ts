@@ -61,13 +61,23 @@ export async function createStudent(data: {
         revalidatePath('/principal');
         // Also revalidate class teacher dashboard path (to be created)
         return { success: true };
-    } catch (error) {
-        console.error('Failed to create student:', error);
+    } catch (_error) {
+        console.error('Failed to create student:', _error);
         return { error: 'Failed to create student' };
     }
 }
 
-export async function updateStudent(studentId: string, data: any) {
+export async function updateStudent(studentId: string, data: Partial<{
+    firstName: string;
+    lastName: string;
+    otherNames: string;
+    gender: Gender;
+    dateOfBirth: Date;
+    registrationNo: string;
+    guardianName: string;
+    guardianPhone: string;
+    address: string;
+}>) {
     // Similar auth checks...
     const session = await auth();
     if (!session?.user) throw new Error('Unauthorized');
@@ -81,7 +91,7 @@ export async function updateStudent(studentId: string, data: any) {
         revalidatePath('/headmaster');
         revalidatePath('/principal');
         return { success: true };
-    } catch (e) {
+    } catch (_e) {
         return { error: 'Update failed' };
     }
 }
@@ -90,12 +100,13 @@ export async function deleteStudent(studentId: string) {
     const session = await auth();
     if (!session?.user) throw new Error('Unauthorized');
 
+    // Add check to ensure user has permission to delete from this section
     try {
         await prisma.student.delete({ where: { id: studentId } });
         revalidatePath('/headmaster');
         revalidatePath('/principal');
         return { success: true };
-    } catch (e) {
+    } catch (_e) {
         return { error: 'Delete failed' };
     }
 }

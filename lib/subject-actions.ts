@@ -45,8 +45,8 @@ export async function createSubject(data: {
         revalidatePath('/headmaster');
         revalidatePath('/principal');
         return { success: true };
-    } catch (error) {
-        console.error('Failed to create subject:', error);
+    } catch (_error) {
+        console.error('Failed to create subject:', _error);
         return { error: 'Failed to create subject. Name or Code might be duplicate.' };
     }
 }
@@ -66,7 +66,7 @@ export async function deleteSubject(subjectId: string) {
         revalidatePath('/headmaster');
         revalidatePath('/principal');
         return { success: true };
-    } catch (error) {
+    } catch (_error) {
         return { error: 'Failed to delete subject' };
     }
 }

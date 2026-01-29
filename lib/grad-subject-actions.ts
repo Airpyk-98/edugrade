@@ -36,7 +36,7 @@ export async function addSubjectToClass(classId: string, subjectId: string) {
         revalidatePath('/headmaster');
         revalidatePath('/principal');
         return { success: true };
-    } catch (error) {
+    } catch (_error) {
         // likely duplicate
         return { error: 'Subject already added to this class' };
     }
@@ -51,7 +51,7 @@ export async function removeSubjectFromClass(classSubjectId: string) {
         revalidatePath('/headmaster');
         revalidatePath('/principal');
         return { success: true };
-    } catch (error) {
+    } catch (_error) {
         return { error: 'Failed' };
     }
 }
@@ -88,7 +88,7 @@ export async function assignSubjectTeacher(classSubjectId: string, teacherId: st
         revalidatePath('/principal');
         return { success: true };
 
-    } catch (error) {
+    } catch (_error) {
         return { error: 'Assignment failed or already exists' };
     }
 }
@@ -102,7 +102,7 @@ export async function removeSubjectTeacher(assignmentId: string) {
         revalidatePath('/headmaster');
         revalidatePath('/principal');
         return { success: true };
-    } catch (e) {
+    } catch (_e) {
         return { error: 'Failed' };
     }
 }

@@ -2,7 +2,7 @@
 
 import prisma from './prisma';
 import { revalidatePath } from 'next/cache';
-import { ClassLevel, Section, UserPosition } from '@prisma/client';
+import { ClassLevel, Section } from '@prisma/client';
 import { auth } from '@/auth';
 
 export async function createClass(data: {

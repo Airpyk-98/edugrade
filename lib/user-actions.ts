@@ -3,7 +3,6 @@
 import prisma from './prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
-import { redirect } from 'next/navigation';
 
 const SignupSchema = z.object({
     fullName: z.string().min(2),
@@ -17,7 +16,7 @@ const SignupSchema = z.object({
     specializations: z.array(z.string()).optional()
 });
 
-export async function registerUser(prevState: any, formData: FormData) {
+export async function registerUser(_prevState: unknown, formData: FormData) {
     const rawData = {
         fullName: formData.get('fullName'),
         email: formData.get('email'),

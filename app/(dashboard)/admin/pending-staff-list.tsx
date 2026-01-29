@@ -9,7 +9,16 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { UserPosition, Section } from '@prisma/client';
 
-export function PendingStaffList({ staff }: { staff: any[] }) {
+interface PendingUser {
+    id: string;
+    fullName: string;
+    email: string;
+    phone?: string | null;
+    qualification: string;
+    preferredLevel: string;
+}
+
+export function PendingStaffList({ staff }: { staff: PendingUser[] }) {
     const [selectedSection, setSelectedSection] = useState<Record<string, Section>>({});
     const [selectedPosition, setSelectedPosition] = useState<Record<string, UserPosition>>({});
 

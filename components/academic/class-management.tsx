@@ -27,12 +27,12 @@ import {
 import { ClassResultStatusBadge } from './class-result-status';
 
 export function ClassManagement({ classes, staff, subjects, section, currentTermId, userRole }: {
-    classes: any[],
-    staff: any[],
-    subjects: any[],
-    section: Section,
-    currentTermId?: string,
-    userRole?: string
+    classes: any[]; // Result of getClasses with includes, complex to type exactly here without importing Prisma types
+    staff: { id: string; fullName: string; isClassTeacher: boolean; assignedClassId?: string | null }[];
+    subjects: { id: string; name: string; code: string | null }[];
+    section: Section;
+    currentTermId?: string;
+    userRole?: string;
 }) {
     const [isCreating, setIsCreating] = useState(false);
     const [newClassName, setNewClassName] = useState('');
@@ -44,8 +44,8 @@ export function ClassManagement({ classes, staff, subjects, section, currentTerm
     const [isAssigning, setIsAssigning] = useState(false);
 
     // Subject Management State
-    const [managingSubjectsClass, setManagingSubjectsClass] = useState<any | null>(null);
-    const [managingStudentsClass, setManagingStudentsClass] = useState<any | null>(null);
+    const [managingSubjectsClass, setManagingSubjectsClass] = useState<{ id: string; name: string } | null>(null);
+    const [managingStudentsClass, setManagingStudentsClass] = useState<{ id: string; name: string } | null>(null);
 
 
     const handleCreate = async () => {

@@ -67,7 +67,7 @@ export async function updateClassResultStatus(classId: string, termId: string, n
         revalidatePath('/headmaster');
         revalidatePath('/principal');
         return { success: true };
-    } catch (e) {
+    } catch (_e) {
         return { error: 'Failed to update status' };
     }
 }

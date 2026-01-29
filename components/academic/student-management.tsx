@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createStudent, deleteStudent, getStudentsByClass } from '@/lib/student-actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,16 +26,16 @@ export function StudentManagement({ classId, className }: { classId: string, cla
     const [dob, setDob] = useState(''); // YYYY-MM-DD
     const [regNo, setRegNo] = useState('');
 
-    const loadStudents = async () => {
+    const loadStudents = useCallback(async () => {
         setLoading(true);
         const data = await getStudentsByClass(classId);
         setStudents(data);
         setLoading(false);
-    };
+    }, [classId]);
 
     useEffect(() => {
         if (classId) loadStudents();
-    }, [classId]);
+    }, [classId, loadStudents]);
 
     const handleCreate = async () => {
         if (!firstName || !lastName || !regNo || !dob) {

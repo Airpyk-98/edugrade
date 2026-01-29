@@ -4,7 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-export function StaffList({ staff }: { staff: any[] }) {
+interface StaffMember {
+    id: string;
+    fullName: string;
+    email: string;
+    phone?: string | null;
+    position: string;
+    section?: string | null;
+    isClassTeacher: boolean;
+    isSubjectTeacher: boolean;
+}
+
+export function StaffList({ staff }: { staff: StaffMember[] }) {
     if (staff.length === 0) {
         return (
             <Card>

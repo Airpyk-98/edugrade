@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from 'next-auth';
+import { UserPosition, Section, UserStatus } from '@prisma/client';
 
 export const authConfig = {
     pages: {
@@ -32,6 +33,7 @@ export const authConfig = {
                 token.managedSection = user.managedSection;
                 token.isClassTeacher = user.isClassTeacher;
                 token.isSubjectTeacher = user.isSubjectTeacher;
+                token.assignedClassId = (user as any).assignedClassId;
             }
             return token;
         },
@@ -39,12 +41,13 @@ export const authConfig = {
             if (token) {
                 session.user.id = token.id as string;
                 session.user.fullName = token.fullName as string;
-                session.user.status = token.status as any;
-                session.user.position = token.position as any;
-                session.user.section = token.section as any;
-                session.user.managedSection = token.managedSection as any;
+                session.user.status = token.status as UserStatus;
+                session.user.position = token.position as UserPosition;
+                session.user.section = token.section as Section | null;
+                session.user.managedSection = token.managedSection as Section | null;
                 session.user.isClassTeacher = token.isClassTeacher as boolean;
                 session.user.isSubjectTeacher = token.isSubjectTeacher as boolean;
+                session.user.assignedClassId = token.assignedClassId as string | null;
             }
             return session;
         },

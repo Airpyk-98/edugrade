@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     getClassSubjects,
     addSubjectToClass,
@@ -24,16 +24,16 @@ export function ClassSubjectManager({ classId, className, availableSubjects, sta
     const [selectedSubjectId, setSelectedSubjectId] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         const data = await getClassSubjects(classId);
         setClassSubjects(data);
         setLoading(false);
-    };
+    }, [classId]);
 
     useEffect(() => {
         if (classId) loadData();
-    }, [classId]);
+    }, [classId, loadData]);
 
     const handleAddSubject = async () => {
         if (!selectedSubjectId) return;

@@ -18,7 +18,7 @@ async function main() {
 
   const superAdminHash = await bcrypt.hash(superAdminPassword, 10);
 
-  const superAdmin = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: superAdminEmail },
     update: {},
     create: {
@@ -45,7 +45,7 @@ async function main() {
   console.log('✅ Academic Session created');
 
   // 3. Create Terms
-  const firstTerm = await prisma.term.create({
+  const _firstTerm = await prisma.term.create({
     data: {
       name: 'FIRST_TERM',
       sessionId: currentSession.id,
@@ -194,7 +194,7 @@ async function main() {
   ];
 
   for (const classData of classes) {
-    // @ts-ignore
+    // @ts-expect-error: Prisma model 'Class' is wrongly categorized as Reserved Word in some environments or has minor type mismatch in spread
     await prisma.class.create({
       data: {
         ...classData,

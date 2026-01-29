@@ -12,7 +12,15 @@ import { Section } from '@prisma/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Trash2 } from 'lucide-react';
 
-export function SubjectManagement({ subjects, section }: { subjects: any[], section: Section }) {
+interface SubjectInfo {
+    id: string;
+    name: string;
+    code: string | null;
+    section: string;
+    isCore: boolean;
+}
+
+export function SubjectManagement({ subjects, section }: { subjects: SubjectInfo[], section: Section }) {
     const [isCreating, setIsCreating] = useState(false);
     const [name, setName] = useState('');
     const [code, setCode] = useState('');
