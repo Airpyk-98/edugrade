@@ -1,5 +1,5 @@
 // scripts/seed.ts
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ClassLevel, Section } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -164,7 +164,7 @@ async function main() {
   console.log('✅ Secondary subjects created');
 
   // 7. Create Sample Classes
-  const classes = [
+  const classes: { name: string; level: ClassLevel; section: Section }[] = [
     // Primary
     { name: 'Pre-KG', level: 'PRE_KG', section: 'PRIMARY' },
     { name: 'Nursery 1', level: 'NURSERY_1', section: 'PRIMARY' },
@@ -194,7 +194,6 @@ async function main() {
   ];
 
   for (const classData of classes) {
-    // @ts-expect-error: Prisma model 'Class' is wrongly categorized as Reserved Word in some environments or has minor type mismatch in spread
     await prisma.class.create({
       data: {
         ...classData,

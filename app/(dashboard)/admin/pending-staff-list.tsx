@@ -14,8 +14,8 @@ interface PendingUser {
     fullName: string;
     email: string;
     phone?: string | null;
-    qualification: string;
-    preferredLevel: string;
+    qualification?: string | null;
+    preferredLevel?: string | null;
 }
 
 export function PendingStaffList({ staff }: { staff: PendingUser[] }) {
@@ -81,8 +81,8 @@ export function PendingStaffList({ staff }: { staff: PendingUser[] }) {
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-2 text-sm">
                             <div>Phone:</div><div>{user.phone || 'N/A'}</div>
-                            <div>Qualification:</div><div>{user.qualification}</div>
-                            <div>Pref. Level:</div><div>{user.preferredLevel}</div>
+                            <div>Qualification:</div><div>{user.qualification || 'N/A'}</div>
+                            <div>Pref. Level:</div><div>{user.preferredLevel || 'N/A'}</div>
                         </div>
 
                         <div className="space-y-2">

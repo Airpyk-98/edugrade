@@ -13,6 +13,7 @@ interface StaffMember {
     section?: string | null;
     isClassTeacher: boolean;
     isSubjectTeacher: boolean;
+    qualification?: string | null;
 }
 
 export function StaffList({ staff }: { staff: StaffMember[] }) {

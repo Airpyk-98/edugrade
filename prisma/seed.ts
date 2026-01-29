@@ -14,9 +14,9 @@ async function main() {
         await prisma.user.create({
             data: {
                 email,
-                password: hashedPassword,
+                passwordHash: hashedPassword,
                 fullName: 'Super Admin',
-                phoneNumber: '0000000000',
+                phone: '0000000000',
                 status: 'APPROVED',
                 position: 'SUPER_ADMIN',
                 // Super Admin doesn't necessarily belong to a section, or access both? 
@@ -33,7 +33,7 @@ async function main() {
         await prisma.user.update({
             where: { email },
             data: {
-                password: hashedPassword,
+                passwordHash: hashedPassword,
                 position: 'SUPER_ADMIN',
                 status: 'APPROVED'
             }

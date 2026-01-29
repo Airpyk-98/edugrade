@@ -12,7 +12,7 @@ export async function getClassSubjects(classId: string) {
         where: { classId },
         include: {
             subject: true,
-            teachers: {
+            assignments: {
                 include: {
                     teacher: { select: { id: true, fullName: true } }
                 }

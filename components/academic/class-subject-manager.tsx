@@ -119,13 +119,13 @@ export function ClassSubjectManager({ classId, className, availableSubjects, sta
                                 <TableCell>
                                     <div className="space-y-2">
                                         <div className="flex flex-wrap gap-1">
-                                            {cs.teachers.map((t: any) => (
+                                            {cs.assignments.map((t: any) => (
                                                 <Badge key={t.id} variant="secondary" className="flex items-center gap-1">
                                                     {t.teacher.fullName}
                                                     <X className="h-3 w-3 cursor-pointer hover:text-red-500" onClick={() => handleRemoveTeacher(t.id)} />
                                                 </Badge>
                                             ))}
-                                            {cs.teachers.length === 0 && <span className="text-sm text-gray-400 italic">No teachers assigned</span>}
+                                            {cs.assignments.length === 0 && <span className="text-sm text-gray-400 italic">No teachers assigned</span>}
                                         </div>
 
                                         <div className="flex gap-1 items-center">

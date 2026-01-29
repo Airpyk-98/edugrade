@@ -144,6 +144,8 @@ model Term {
 
   createdAt DateTime @default(now())
 
+  resultsStatus ClassTermStatus[]
+
   @@unique([sessionId, name])
   @@index([isActive])
 }
@@ -169,6 +171,8 @@ model Class {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  resultsStatus ClassTermStatus[]
 
   @@index([section, level])
 }
@@ -414,4 +418,28 @@ model SchoolSettings {
   secondaryColor String   @default("#7c3aed")
 
   updatedAt DateTime @updatedAt
+}
+
+enum ResultStatus {
+  OPEN
+  SUBMITTED
+  LOCKED
+  APPROVED
+}
+
+model ClassTermStatus {
+  id          String   @id @default(cuid())
+  class       Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  classId     String
+  term        Term     @relation(fields: [termId], references: [id], onDelete: Cascade)
+  termId      String
+  status      ResultStatus @default(OPEN)
+  
+  submittedAt DateTime?
+  lockedAt    DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([classId, termId])
 }
