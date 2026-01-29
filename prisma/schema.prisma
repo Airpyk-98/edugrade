@@ -1,0 +1,417 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+// ============================================
+// USERS & AUTHENTICATION
+// ============================================
+
+enum UserPosition {
+  SUPER_ADMIN
+  HEADMASTER
+  PRINCIPAL
+  STAFF
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum Section {
+  PRIMARY
+  SECONDARY
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  fullName      String
+  phone         String?
+  dateOfBirth   DateTime?
+  gender        Gender?
+  qualification String?
+  profilePhotoUrl String?
+
+  // Organizational Position
+  position       UserPosition @default(STAFF)
+  status         UserStatus   @default(PENDING)
+  section        Section?     // Assigned section for all users (Managed by Super Admin)
+  managedSection Section?     // Redundant if we use 'section', but keeping for clarity/legacy from PDF. Let's merge: 'section' implies where they work.
+
+  // Teaching Roles (can have both)
+  isClassTeacher   Boolean @default(false)
+  isSubjectTeacher Boolean @default(false)
+
+  // Class Teacher Assignment (only ONE class)
+  assignedClass   Class?  @relation("ClassTeacherAssignment")
+  assignedClassId String? @unique
+
+  // Subject Teacher Assignments (many)
+  subjectAssignments SubjectAssignment[]
+
+  // Subject Specializations (for initial registration)
+  specializations String[] // Array of subject names
+  preferredLevel  String?  // "Primary", "Secondary", "Both"
+
+  // Audit
+  approvedBy     User?     @relation("ApprovalRelation", fields: [approvedById], references: [id])
+  approvedById   String?
+  approvedAt     DateTime?
+  approvedUsers  User[]    @relation("ApprovalRelation")
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  gradesEntered  Grade[]
+  remarksWritten Remark[]
+
+  @@index([position, status])
+  @@index([email])
+}
+
+// ============================================
+// ACADEMIC STRUCTURE
+// ============================================
+
+enum ClassLevel {
+  PRE_KG
+  NURSERY_1
+  NURSERY_2
+  BASIC_1
+  BASIC_2
+  BASIC_3
+  BASIC_4
+  BASIC_5
+  BASIC_6
+  JSS_1
+  JSS_2
+  JSS_3
+  SS_1
+  SS_2
+  SS_3
+}
+
+model AcademicSession {
+  id        String   @id @default(cuid())
+  name      String   @unique // e.g., "2024/2025"
+  startDate DateTime
+  endDate   DateTime
+  isCurrent Boolean  @default(false)
+
+  terms     Term[]
+  createdAt DateTime @default(now())
+
+  @@index([isCurrent])
+}
+
+enum TermName {
+  FIRST_TERM
+  SECOND_TERM
+  THIRD_TERM
+}
+
+model Term {
+  id             String          @id @default(cuid())
+  name           TermName
+  session        AcademicSession @relation(fields: [sessionId], references: [id])
+  sessionId      String
+  startDate      DateTime
+  endDate        DateTime
+  nextTermBegins DateTime?
+
+  isActive Boolean @default(false)
+  isLocked Boolean @default(false) // Prevent grade editing
+
+  grades  Grade[]
+  reports ReportCard[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([sessionId, name])
+  @@index([isActive])
+}
+
+model Class {
+  id      String     @id @default(cuid())
+  name    String     @unique // e.g., "JSS 2A"
+  level   ClassLevel
+  section Section    // PRIMARY or SECONDARY
+
+  // Class Teacher (ONE per class)
+  classTeacher   User? @relation("ClassTeacherAssignment", fields: [classTeacherId], references: [id])
+  classTeacherId String? @unique
+
+  // Students
+  students Student[]
+
+  // Subjects offered in this class
+  subjects ClassSubject[]
+
+  // Attendance tracking
+  daysSchoolOpened Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([section, level])
+}
+
+model Subject {
+  id       String  @id @default(cuid())
+  name     String  @unique
+  code     String? @unique
+  section  Section // PRIMARY or SECONDARY
+  isCore   Boolean @default(false) // Required for all students
+
+  classSubjects ClassSubject[]
+  grades        Grade[]
+
+  createdAt DateTime @default(now())
+
+  @@index([section])
+}
+
+// Many-to-Many: Class <-> Subject (which subjects are offered in which class)
+model ClassSubject {
+  id        String  @id @default(cuid())
+  class     Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  classId   String
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId String
+
+  isActive Boolean @default(true)
+
+  // Subject Teacher Assignments for this class-subject combo
+  assignments SubjectAssignment[]
+
+  @@unique([classId, subjectId])
+  @@index([classId])
+  @@index([subjectId])
+}
+
+// Subject Teacher Assignment (a teacher can teach multiple subjects in multiple classes)
+model SubjectAssignment {
+  id             String       @id @default(cuid())
+  teacher        User         @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacherId      String
+  classSubject   ClassSubject @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
+  classSubjectId String
+
+  assignedAt DateTime @default(now())
+  assignedBy String? // Headmaster/Principal ID
+
+  @@unique([teacherId, classSubjectId])
+  @@index([teacherId])
+}
+
+// ============================================
+// STUDENTS & ENROLLMENT
+// ============================================
+
+model Student {
+  id             String   @id @default(cuid())
+  registrationNo String   @unique
+  firstName      String
+  lastName       String
+  otherNames     String?
+  gender         Gender
+  dateOfBirth    DateTime
+  photoUrl       String?
+
+  // Enrollment
+  class   Class  @relation(fields: [classId], references: [id])
+  classId String
+
+  // Parent/Guardian Info
+  guardianName  String?
+  guardianPhone String?
+  guardianEmail String?
+  address       String?
+
+  // Academic Records
+  grades           Grade[]
+  attendance       Attendance[]
+  behavioralScores BehavioralScore[]
+  reportCards      ReportCard[]
+
+  // Status
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([classId])
+  @@index([registrationNo])
+}
+
+// ============================================
+// GRADING & ASSESSMENT
+// ============================================
+
+model Grade {
+  id        String  @id @default(cuid())
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId String
+  term      Term    @relation(fields: [termId], references: [id])
+  termId    String
+
+  // Scores (nullable until entered)
+  firstTest   Float? @default(0) // Max 10
+  secondTest  Float? @default(0) // Max 10
+  thirdTest   Float? @default(0) // Max 10
+  examination Float? @default(0) // Max 70
+
+  // Auto-calculated
+  total Float? // Sum of all (max 100)
+  grade String? // A1, B2, C4, etc.
+
+  // Subject Teacher Remark (optional)
+  subjectRemark String?
+
+  // Meta
+  enteredBy    User     @relation(fields: [enteredById], references: [id])
+  enteredById  String
+  enteredAt    DateTime @default(now())
+  lastEditedAt DateTime @updatedAt
+
+  // Audit trail
+  editHistory GradeEdit[]
+
+  @@unique([studentId, subjectId, termId])
+  @@index([studentId, termId])
+  @@index([subjectId])
+}
+
+// Audit trail for grade changes
+model GradeEdit {
+  id      String @id @default(cuid())
+  grade   Grade  @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  gradeId String
+
+  fieldChanged String // "firstTest", "examination", etc.
+  oldValue     Float?
+  newValue     Float?
+
+  editedBy String // User ID
+  editedAt DateTime @default(now())
+  reason   String?
+
+  @@index([gradeId])
+}
+
+// Attendance per term
+model Attendance {
+  id        String  @id @default(cuid())
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String
+  termId    String
+
+  daysPresent Int @default(0)
+  daysAbsent  Int @default(0)
+
+  @@unique([studentId, termId])
+}
+
+// Affective & Psychomotor (Behavioral Scores)
+enum BehavioralCategory {
+  AFFECTIVE
+  PSYCHOMOTOR
+}
+
+model BehavioralScore {
+  id        String             @id @default(cuid())
+  student   Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String
+  termId    String
+  category  BehavioralCategory
+  trait     String // e.g., "Punctuality", "Handwriting"
+  rating    Int // 1-5
+
+  @@unique([studentId, termId, category, trait])
+  @@index([studentId, termId])
+}
+
+// ============================================
+// REPORT CARDS & REMARKS
+// ============================================
+
+model ReportCard {
+  id        String  @id @default(cuid())
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String
+  term      Term    @relation(fields: [termId], references: [id])
+  termId    String
+
+  // Calculated summary
+  totalScore    Float?
+  averageScore  Float?
+  position      Int?   // Position in class
+  totalStudents Int?
+
+  subjectsPassed Int?
+  subjectsFailed Int?
+
+  // Remarks
+  classTeacherRemark String?
+  headTeacherRemark  String?
+
+  // Status
+  isDraft     Boolean   @default(true)
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, termId])
+  @@index([termId])
+}
+
+// Separate table for remarks (for audit)
+model Remark {
+  id           String   @id @default(cuid())
+  reportCardId String
+  type         String // "class_teacher", "headmaster", "principal"
+  content      String
+  writtenBy    User     @relation(fields: [writtenById], references: [id])
+  writtenById  String
+  writtenAt    DateTime @default(now())
+
+  @@index([reportCardId])
+}
+
+// ============================================
+// SYSTEM CONFIGURATION
+// ============================================
+
+model SchoolSettings {
+  id             String   @id @default(cuid())
+  schoolName     String
+  schoolAddress  String?
+  schoolPhone    String?
+  schoolEmail    String?
+  schoolLogoUrl  String?
+  schoolMotto    String?
+  primaryColor   String   @default("#1e40af")
+  secondaryColor String   @default("#7c3aed")
+
+  updatedAt DateTime @updatedAt
+}
