@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { Toaster } from '@/components/ui/sonner';
+import { AuthProvider } from '@/components/auth-provider';
 
 export const metadata: Metadata = {
   title: 'EduGrade',
@@ -17,8 +18,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        {children}
-        <Toaster />
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );
