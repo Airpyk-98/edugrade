@@ -1,3 +1,5 @@
+import type { NextAuthConfig } from 'next-auth';
+
 // Define types locally to avoid importing @prisma/client in Edge Runtime (Middleware)
 export enum UserPosition {
     SUPER_ADMIN = 'SUPER_ADMIN',
@@ -42,7 +44,7 @@ export const authConfig = {
             }
             return true;
         },
-        jwt({ token, user }) {
+        jwt({ token, user }: any) {
             if (user) {
                 token.id = user.id;
                 token.fullName = user.fullName;
@@ -56,7 +58,7 @@ export const authConfig = {
             }
             return token;
         },
-        session({ session, token }) {
+        session({ session, token }: any) {
             if (token) {
                 session.user.id = token.id as string;
                 session.user.fullName = token.fullName as string;
