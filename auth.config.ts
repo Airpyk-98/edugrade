@@ -26,7 +26,7 @@ export const authConfig = {
         newUser: '/auth/signup', // Redirect here after signup if needed, or just use it as part of flow
     },
     callbacks: {
-        authorized({ auth, request: { nextUrl } }) {
+        authorized({ auth, request: { nextUrl } }: any) {
             const isLoggedIn = !!auth?.user;
             const isOnDashboard = nextUrl.pathname.startsWith('/dashboard') ||
                 nextUrl.pathname.startsWith('/admin') ||
