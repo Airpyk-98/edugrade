@@ -3,7 +3,12 @@ import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default async function DashboardPage() {
-    const session = await auth();
+    let session;
+    try {
+        session = await auth();
+    } catch (error) {
+        console.error('Dashboard page auth check failed:', error);
+    }
 
     if (!session?.user) {
         redirect('/auth/login');
