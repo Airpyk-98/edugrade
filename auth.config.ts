@@ -1,5 +1,24 @@
-import type { NextAuthConfig } from 'next-auth';
-import { UserPosition, Section, UserStatus } from '@prisma/client';
+// Define types locally to avoid importing @prisma/client in Edge Runtime (Middleware)
+export enum UserPosition {
+    SUPER_ADMIN = 'SUPER_ADMIN',
+    HEADMASTER = 'HEADMASTER',
+    PRINCIPAL = 'PRINCIPAL',
+    STAFF = 'STAFF',
+}
+
+export enum UserStatus {
+    PENDING = 'PENDING',
+    APPROVED = 'APPROVED',
+    REJECTED = 'REJECTED',
+    SUSPENDED = 'SUSPENDED',
+}
+
+export enum Section {
+    PRIMARY = 'PRIMARY',
+    SECONDARY = 'SECONDARY',
+}
+
+// import { UserPosition, Section, UserStatus } from '@prisma/client';
 
 export const authConfig = {
     pages: {
